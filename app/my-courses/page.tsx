@@ -5,6 +5,22 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 import { db, auth } from '@/lib/firebase';
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
+import { 
+  BookOpen, 
+  Clock, 
+  TrendingUp, 
+  PlayCircle,
+  Award,
+  Filter,
+  Search,
+  Grid,
+  List,
+  Calendar,
+  BarChart3,
+  Target,
+  Sparkles
+} from 'lucide-react';
+import { getCourseProgress } from '@/lib/purchaseUtils'; // ✅ Ensure this is imported
 
 interface Course {
   id: string;
@@ -14,6 +30,10 @@ interface Course {
   videoPlaybackId?: string;
   videoDuration?: number;
   videoThumbnail?: string;
+  instructor?: string;
+  category?: string;
+  lastWatched?: any;
+  progress?: number;
 }
 
 interface Purchase {
@@ -24,12 +44,16 @@ interface Purchase {
 
 interface CourseWithPurchase extends Course {
   purchaseDate: any;
+  progress: number;
 }
 
 export default function MyCoursesPage() {
   const [purchasedCourses, setPurchasedCourses] = useState<CourseWithPurchase[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [filter, setFilter] = useState<'all' | 'in-progress' | 'completed'>('all');
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -45,7 +69,7 @@ export default function MyCoursesPage() {
 
   const fetchPurchasedCourses = async (userId: string) => {
     try {
-      // 1. Get all purchases for this user
+      // Get all purchases for this user
       const purchasesQuery = query(
         collection(db, 'purchases'),
         where('userId', '==', userId)
@@ -60,21 +84,35 @@ export default function MyCoursesPage() {
         } as Purchase);
       });
 
-  
+      // Get course details for each purchase WITH PROGRESS
       const coursesPromises = purchases.map(async (purchase) => {
-    
         const coursesQuery = query(
           collection(db, 'courses'),
           where('__name__', '==', purchase.courseId)
         );
         const courseSnapshot = await getDocs(coursesQuery);
-                 
+               
         if (!courseSnapshot.empty) {
           const courseDoc = courseSnapshot.docs[0];
+          const courseData = courseDoc.data();
+          
+          // ✅ FIXED: Get progress using the userId parameter, NOT the component's user state
+          let progress = 0;
+          progress = await getCourseProgress(userId, purchase.courseId); // ✅ Use userId parameter
+          
           return {
             id: courseDoc.id,
-            ...courseDoc.data(),
-            purchaseDate: purchase.purchaseDate
+            title: courseData.title,
+            description: courseData.description,
+            price: courseData.price,
+            videoPlaybackId: courseData.videoPlaybackId,
+            videoDuration: courseData.videoDuration,
+            videoThumbnail: courseData.videoThumbnail,
+            instructor: courseData.instructor || 'Expert Instructor',
+            category: courseData.category || 'Development',
+            purchaseDate: purchase.purchaseDate,
+            progress: progress, // ✅ REAL progress from database
+            lastWatched: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000)
           } as CourseWithPurchase;
         }
         return null;
@@ -85,8 +123,19 @@ export default function MyCoursesPage() {
       const validCourses = coursesResults.filter((course): course is CourseWithPurchase => 
         course !== null
       );
+
+      // Remove duplicate courses
+      const uniqueCourses = validCourses.filter((course, index, self) => {
+        const firstIndex = self.findIndex(c => c.id === course.id);
+        return index === firstIndex;
+      });
              
-      setPurchasedCourses(validCourses);
+      console.log('📊 Loaded purchased courses with progress:', uniqueCourses.map(c => ({
+        title: c.title,
+        progress: c.progress
+      })));
+             
+      setPurchasedCourses(uniqueCourses);
          
     } catch (error) {
       console.error('Error fetching purchased courses:', error);
@@ -96,17 +145,23 @@ export default function MyCoursesPage() {
   };
 
   const formatDate = (timestamp: any) => {
-    if (!timestamp) return 'Unknown date';
+    if (!timestamp) return 'Recently';
     const date = timestamp.toDate();
+    const now = new Date();
+    const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    
     return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
+      month: 'short',
       day: 'numeric'
     });
   };
 
   const formatDuration = (seconds: number | undefined) => {
-    if (!seconds) return '';
+    if (!seconds) return '2h';
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
          
@@ -116,12 +171,35 @@ export default function MyCoursesPage() {
     return `${minutes}m`;
   };
 
+  // Filter and search courses
+  const filteredCourses = purchasedCourses.filter(course => {
+    const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         course.description.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (filter === 'completed') return matchesSearch && course.progress === 100;
+    if (filter === 'in-progress') return matchesSearch && course.progress > 0 && course.progress < 100;
+    
+    return matchesSearch;
+  });
+
+  // Calculate stats
+  const totalCourses = purchasedCourses.length;
+  const completedCourses = purchasedCourses.filter(c => c.progress === 100).length;
+  const inProgressCourses = purchasedCourses.filter(c => c.progress > 0 && c.progress < 100).length;
+  const totalLearningTime = purchasedCourses.reduce((acc, course) => {
+    const hours = course.videoDuration ? Math.floor(course.videoDuration / 3600) : 2;
+    return acc + hours;
+  }, 0);
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar user={user} />
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+        <Navbar user={user}/>
         <div className="flex justify-center items-center h-64">
-          <div className="text-lg">Loading your courses...</div>
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-lg text-gray-600">Loading your courses...</p>
+          </div>
         </div>
       </div>
     );
@@ -129,16 +207,20 @@ export default function MyCoursesPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
         <Navbar user={user} />
         <div className="max-w-4xl mx-auto py-16 px-4 text-center">
+          <div className="w-24 h-24 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <BookOpen className="h-12 w-12 text-blue-500" />
+          </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-4">My Courses</h1>
-          <p className="text-gray-600 mb-8">Please log in to view your courses.</p>
+          <p className="text-gray-600 mb-8">Please sign in to view your courses.</p>
           <Link 
              href="/"
-             className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600"
+             className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-300"
           >
-            Go to Courses
+            <span>Go to Courses</span>
+            <TrendingUp className="h-5 w-5" />
           </Link>
         </div>
       </div>
@@ -146,113 +228,427 @@ export default function MyCoursesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <Navbar user={user} />
              
-      <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">My Courses</h1>
-          <p className="text-gray-600 mt-2">
-            Continue your learning journey
-          </p>
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">My Learning</h1>
+              <p className="text-gray-600 mt-2">
+                Continue your learning journey
+              </p>
+            </div>
+            
+            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-50 to-purple-50 px-4 py-2 rounded-full">
+              <Sparkles className="h-4 w-4 text-purple-500" />
+              <span className="text-sm font-medium text-purple-700">
+                Keep going! You're making progress
+              </span>
+            </div>
+          </div>
         </div>
 
-        {purchasedCourses.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {purchasedCourses.map((course) => (
-              <div key={course.id} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow">
-                {/* Video Thumbnail Section */}
-                <div className="relative aspect-video bg-gray-800">
-                  {course.videoThumbnail ? (
-                    <>
-                      {/* Thumbnail Image */}
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-6 rounded-2xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-blue-600 font-medium">Total Courses</p>
+                <p className="text-3xl font-bold text-gray-900">{totalCourses}</p>
+              </div>
+              <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+                <BookOpen className="h-6 w-6 text-blue-500" />
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-r from-green-50 to-green-100 p-6 rounded-2xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-green-600 font-medium">Completed</p>
+                <p className="text-3xl font-bold text-gray-900">{completedCourses}</p>
+              </div>
+              <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+                <Award className="h-6 w-6 text-green-500" />
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-6 rounded-2xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-purple-600 font-medium">In Progress</p>
+                <p className="text-3xl font-bold text-gray-900">{inProgressCourses}</p>
+              </div>
+              <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+                <TrendingUp className="h-6 w-6 text-purple-500" />
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-r from-pink-50 to-pink-100 p-6 rounded-2xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-pink-600 font-medium">Learning Hours</p>
+                <p className="text-3xl font-bold text-gray-900">{totalLearningTime}h</p>
+              </div>
+              <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+                <Clock className="h-6 w-6 text-pink-500" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Controls Bar */}
+        <div className="bg-white rounded-2xl shadow-lg p-4 mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            {/* Search */}
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search your courses..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            
+            {/* Filters & View */}
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <Filter className="h-5 w-5 text-gray-500" />
+                <select 
+                  value={filter}
+                  onChange={(e) => setFilter(e.target.value as any)}
+                  className="bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="all">All Courses</option>
+                  <option value="in-progress">In Progress</option>
+                  <option value="completed">Completed</option>
+                </select>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                >
+                  <Grid className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                >
+                  <List className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Courses Grid/List */}
+        {filteredCourses.length > 0 ? (
+          viewMode === 'grid' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredCourses.map((course) => (
+                <div key={course.id} className="group bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200 hover:shadow-2xl transition-all duration-300">
+                  {/* Course Image */}
+                  <div className="relative aspect-video">
+                    {course.videoThumbnail ? (
                       <img
                         src={course.videoThumbnail}
                         alt={course.title}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
-                                         
-                      {/* Gradient Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-                                         
-                      {/* Video Duration Badge */}
-                      {course.videoDuration && (
-                        <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                        <BookOpen className="h-12 w-12 text-white opacity-75" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                    
+                    {/* Progress Overlay */}
+                    <div className="absolute bottom-0 left-0 right-0">
+                      <div className="px-4 pb-4">
+                        <div className="flex justify-between items-center text-white text-sm mb-2">
+                          <span>{course.progress}% Complete</span>
+                          <span>{formatDuration(course.videoDuration)}</span>
+                        </div>
+                        <div className="w-full bg-white/30 rounded-full h-2">
+                          <div 
+                            className={`h-2 rounded-full transition-all duration-300 ${
+                              course.progress === 100 
+                                ? 'bg-gradient-to-r from-green-400 to-emerald-500'
+                                : 'bg-gradient-to-r from-blue-400 to-purple-500'
+                            }`}
+                            style={{ width: `${course.progress}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Status Badge */}
+                    <div className="absolute top-4 left-4">
+                      <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${
+                        course.progress === 100
+                          ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700'
+                          : course.progress > 0
+                            ? 'bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700'
+                            : 'bg-white/90 text-gray-700'
+                      }`}>
+                        {course.progress === 100 ? 'Completed' : course.progress > 0 ? 'In Progress' : 'Not Started'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Course Info */}
+                  <div className="p-6">
+                    <div className="mb-4">
+                      <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                        {course.category}
+                      </span>
+                    </div>
+                    
+                    <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                      {course.title}
+                    </h3>
+                    
+                    <p className="text-gray-600 mb-4 text-sm line-clamp-2">
+                      {course.description}
+                    </p>
+                    
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center space-x-1">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                          {course.instructor?.charAt(0)}
+                        </div>
+                        <span className="text-sm text-gray-600">{course.instructor}</span>
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        <Calendar className="h-4 w-4 inline mr-1" />
+                        {formatDate(course.purchaseDate)}
+                      </div>
+                    </div>
+                    
+                    {/* Action Button */}
+                    <Link
+                      href={`/courses/${course.id}`}
+                      className={`w-full flex items-center justify-center space-x-2 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                        course.progress === 100
+                          ? 'bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 hover:from-green-100 hover:to-emerald-100 border border-green-200'
+                          : 'bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 shadow-lg hover:shadow-xl'
+                      }`}
+                    >
+                      {course.progress === 100 ? (
+                        <>
+                          <Award className="h-5 w-5" />
+                          <span>View Certificate</span>
+                        </>
+                      ) : course.progress > 0 ? (
+                        <>
+                          <PlayCircle className="h-5 w-5" />
+                          <span>Continue Learning</span>
+                        </>
+                      ) : (
+                        <>
+                          <PlayCircle className="h-5 w-5" />
+                          <span>Start Learning</span>
+                        </>
+                      )}
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            // List View
+            <div className="space-y-4">
+              {filteredCourses.map((course) => (
+                <div key={course.id} className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300">
+                  <div className="flex flex-col lg:flex-row lg:items-center gap-6">
+                    {/* Course Thumbnail */}
+                    <div className="lg:w-48 flex-shrink-0">
+                      <div className="relative aspect-video rounded-xl overflow-hidden">
+                        {course.videoThumbnail ? (
+                          <img
+                            src={course.videoThumbnail}
+                            alt={course.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                            <BookOpen className="h-8 w-8 text-white opacity-75" />
+                          </div>
+                        )}
+                        <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
                           {formatDuration(course.videoDuration)}
                         </div>
-                      )}
-                    </>
-                  ) : (
-                    // Fallback if no thumbnail
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
-                      <div className="text-center text-white">
-                        <svg className="w-12 h-12 mx-auto mb-2 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                        </svg>
-                        <p className="text-sm font-medium">{course.title}</p>
                       </div>
                     </div>
-                  )}
-                </div>
-
-                {/* Course Info Section */}
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <h2 className="text-xl font-semibold text-gray-800 line-clamp-2">{course.title}</h2>
-                    <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded whitespace-nowrap">
-                      Enrolled
-                    </span>
+                    
+                    {/* Course Details */}
+                    <div className="flex-1">
+                      <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                              {course.category}
+                            </span>
+                            <span className={`text-xs font-semibold px-2 py-1 rounded ${
+                              course.progress === 100
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-blue-100 text-blue-700'
+                            }`}>
+                              {course.progress === 100 ? 'Completed' : `${course.progress}%`}
+                            </span>
+                          </div>
+                          
+                          <h3 className="text-xl font-bold text-gray-900 mb-2">
+                            {course.title}
+                          </h3>
+                          
+                          <p className="text-gray-600 mb-4">
+                            {course.description}
+                          </p>
+                          
+                          <div className="flex items-center space-x-4 text-sm text-gray-500">
+                            <div className="flex items-center">
+                              <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-xs mr-2">
+                                {course.instructor?.charAt(0)}
+                              </div>
+                              <span>{course.instructor}</span>
+                            </div>
+                            <span>•</span>
+                            <div className="flex items-center">
+                              <Calendar className="h-4 w-4 mr-1" />
+                              <span>Enrolled {formatDate(course.purchaseDate)}</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Progress & Action */}
+                        <div className="lg:w-48 flex-shrink-0">
+                          <div className="mb-4">
+                            <div className="flex justify-between text-sm text-gray-600 mb-1">
+                              <span>Progress</span>
+                              <span>{course.progress}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div 
+                                className={`h-2 rounded-full ${
+                                  course.progress === 100 
+                                    ? 'bg-gradient-to-r from-green-400 to-emerald-500'
+                                    : 'bg-gradient-to-r from-blue-400 to-purple-500'
+                                }`}
+                                style={{ width: `${course.progress}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                          
+                          <Link
+                            href={`/courses/${course.id}`}
+                            className={`w-full flex items-center justify-center space-x-2 py-2.5 rounded-lg font-semibold transition-all duration-300 ${
+                              course.progress === 100
+                                ? 'bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 hover:from-green-100 hover:to-emerald-100 border border-green-200'
+                                : 'bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600'
+                            }`}
+                          >
+                            {course.progress === 100 ? (
+                              <>
+                                <Award className="h-4 w-4" />
+                                <span>View Certificate</span>
+                              </>
+                            ) : (
+                              <>
+                                <PlayCircle className="h-4 w-4" />
+                                <span>Continue</span>
+                              </>
+                            )}
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                                   
-                  <p className="text-gray-600 mb-4 text-sm line-clamp-2">{course.description}</p>
-                                   
-                  <div className="space-y-3">
-                    <div className="text-sm text-gray-500">
-                      <strong>Enrolled on:</strong> {formatDate(course.purchaseDate)}
+                </div>
+              ))}
+            </div>
+          )
+        ) : (
+          // Empty State
+          <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
+            <div className="w-24 h-24 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Target className="h-12 w-12 text-blue-500" />
+            </div>
+            
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              {searchTerm ? 'No courses found' : 'Start Your Learning Journey'}
+            </h2>
+            
+            <p className="text-gray-600 mb-6 max-w-md mx-auto">
+              {searchTerm 
+                ? 'No courses match your search. Try different keywords.'
+                : 'You haven\'t enrolled in any courses yet. Explore our catalog and start learning!'
+              }
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              {searchTerm ? (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all duration-300"
+                >
+                  Clear Search
+                </button>
+              ) : (
+                <Link
+                  href="/"
+                  className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all duration-300"
+                >
+                  Browse Courses
+                </Link>
+              )}
+              
+              <Link
+                href="/courses"
+                className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:border-blue-500 hover:text-blue-600 transition-all duration-300"
+              >
+                Explore All
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Learning Tips */}
+        {filteredCourses.length > 0 && (
+          <div className="mt-12">
+            <div className="bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 rounded-2xl p-8">
+              <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Keep Going! 🚀</h3>
+                  <p className="text-gray-600">
+                    Consistency is key to learning. Try to spend at least 30 minutes daily on your courses.
+                  </p>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-blue-600">
+                      {Math.round(filteredCourses.reduce((acc, c) => acc + c.progress, 0) / filteredCourses.length)}%
                     </div>
-                                         
-                    <div className="flex gap-2">
-                      <Link 
-                         href={`/courses/${course.id}`}
-                         className="flex-1 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors text-center text-sm font-medium"
-                      >
-                        Continue Learning
-                      </Link>
+                    <div className="text-sm text-gray-600">Avg. Progress</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-purple-600">
+                      {filteredCourses.filter(c => c.progress > 0).length}
                     </div>
-                                         
-                    <div className="pt-3 border-t border-gray-200">
-                      <div className="flex justify-between text-sm text-gray-500">
-                        <span>Progress</span>
-                        <span>0%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-                        <div className="bg-blue-500 h-2 rounded-full" style={{ width: '0%' }}></div>
-                      </div>
-                    </div>
+                    <div className="text-sm text-gray-600">Active Courses</div>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-              </svg>
             </div>
-                         
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">No courses yet</h2>
-            <p className="text-gray-600 mb-6 max-w-md mx-auto">
-              You haven't enrolled in any courses yet. Explore our catalog and start your learning journey!
-            </p>
-                         
-            <Link
-               href="/"
-               className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors inline-block"
-            >
-              Browse Courses
-            </Link>
           </div>
         )}
       </main>

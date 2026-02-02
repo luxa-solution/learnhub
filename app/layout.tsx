@@ -1,20 +1,10 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import Footer from '@/components/layout/Footer'; // Import your Footer
 
 export const metadata: Metadata = {
-  title: "LearnHub - Your Learning Platform", 
-  description: "Learn from expert courses and advance your skills", 
+  title: "LearnHub | Master Skills with Expert-Led Courses",
+  description: "Join thousands of learners mastering new skills with our comprehensive video courses. Start your learning journey today.",
 };
 
 export default function RootLayout({
@@ -23,11 +13,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+    <html lang="en" className="scroll-smooth">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+      </head>
+      <body className="font-sans antialiased bg-gray-50 text-gray-900">
+        <div className="min-h-screen flex flex-col">
+          {/* Main content area - grows to fill space */}
+          <div className="flex-1 w-full overflow-x-hidden">
+            {children}
+          </div>
+          
+          {/* Footer - always at bottom */}
+          <Footer />
+        </div>
       </body>
     </html>
   );

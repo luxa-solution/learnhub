@@ -1,5 +1,5 @@
 'use client'
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import MuxPlayer from '@mux/mux-player-react';
 import { videoService } from '@/lib/videoService';
 
@@ -20,6 +20,7 @@ export default function VideoPlayer({
 }: VideoPlayerProps) {
   const [playerState, setPlayerState] = useState<'loading' | 'ready' | 'error' | 'retrying'>('loading');
   const [error, setError] = useState<string>('');
+  const playerRef = useRef<any>(null);
 
   const handlePlayerReady = useCallback(() => {
     setPlayerState('ready');
@@ -31,6 +32,14 @@ export default function VideoPlayer({
     setPlayerState('error');
     setError('Failed to load video. Please check your connection.');
   }, []);
+
+  const handleTimeUpdate = useCallback((event: any) => {
+    if (onProgress && event.target?.duration) {
+      const progress = (event.target.currentTime / event.target.duration) * 100;
+      onProgress(Math.round(progress)); // ✅ Just pass the progress percentage
+      // ❌ REMOVED: Auto-completion at 95% (this was causing the bug)
+    }
+  }, [onProgress]); // ✅ Removed onComplete from dependencies
 
   const handleRetry = useCallback(() => {
     setPlayerState('retrying');
@@ -93,6 +102,7 @@ export default function VideoPlayer({
 
       {/* Mux Player */}
       <MuxPlayer
+        ref={playerRef}
         playbackId={playbackId}
         streamType="on-demand"
         className={`w-full h-full ${playerState !== 'ready' ? 'opacity-0' : 'opacity-100'}`}
@@ -101,6 +111,9 @@ export default function VideoPlayer({
         secondaryColor="#000000"
         onPlaying={handlePlayerReady}
         onError={handlePlayerError}
+        onTimeUpdate={handleTimeUpdate}
+        onEnded={onComplete}
+        title={title}
       />
     </div>
   );
