@@ -1,7 +1,7 @@
 /* app/globals.css */
 @import 'tailwindcss';
 
-/* CRITICAL: Prevent horizontal scrolling on mobile */
+
 html, body {
   overflow-x: hidden !important;
   max-width: 100vw !important;
@@ -9,26 +9,26 @@ html, body {
   position: relative;
 }
 
-/* Force all containers to respect viewport width */
+
 * {
   max-width: 100%;
   box-sizing: border-box;
 }
 
-/* Special fix for images and videos */
+
 img, video, iframe {
   max-width: 100%;
   height: auto;
 }
 
-/* Container constraints */
+
 .container, .container-fluid {
   width: 100%;
   margin-right: auto;
   margin-left: auto;
 }
 
-/* Custom scrollbar - only for desktop */
+
 @media (min-width: 768px) {
   ::-webkit-scrollbar {
     width: 10px;
@@ -48,12 +48,12 @@ img, video, iframe {
   }
 }
 
-/* Smooth transitions */
+
 * {
   transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
 }
 
-/* Gradient text */
+
 .gradient-text {
   background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
   -webkit-background-clip: text;
@@ -61,7 +61,7 @@ img, video, iframe {
   background-clip: text;
 }
 
-/* Card hover effects - disable on mobile for performance */
+
 @media (hover: hover) and (pointer: fine) {
   .hover-lift {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -89,20 +89,20 @@ img, video, iframe {
   animation: shimmer 2s infinite;
 }
 
-/* Mobile-specific fixes */
+
 @media (max-width: 640px) {
-  /* Prevent horizontal overflow in flex containers */
+  
   .flex, .flex-col, .flex-row {
     flex-wrap: wrap;
   }
   
-  /* Ensure images don't overflow */
+  
   img {
     max-width: 100% !important;
     height: auto !important;
   }
   
-  /* Fix for video player container */
+  
   .aspect-video {
     position: relative;
     width: 100% !important;

@@ -1,4 +1,4 @@
-// app/page.tsx - MODERN VERSION
+// app/page.tsx 
 'use client'
 import { useEffect, useState } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
@@ -162,7 +162,7 @@ export default function Home() {
       <div className="flex justify-center items-center h-[60vh]">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-lg text-gray-600">Loading amazing courses...</p>
+          <p className="text-lg text-gray-600">Loading amazing Arabic courses...</p>
         </div>
       </div>
     </div>
@@ -181,21 +181,20 @@ export default function Home() {
             <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-50 to-purple-50 px-4 py-2 rounded-full mb-6">
               <Sparkles className="h-4 w-4 text-purple-500" />
               <span className="text-sm font-medium text-purple-700">
-                🎉 10,000+ students joined this month
+                🎉 10,000+ students learned Arabic this month
               </span>
             </div>
             
             <h1 className="text-5xl lg:text-7xl font-bold mb-6 leading-tight">
               <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Learn In-Demand
+                Master Arabic
               </span>
               <br />
-              <span className="text-gray-900">Skills from Experts</span>
+              <span className="text-gray-900">From Your First Word to Fluency</span>
             </h1>
             
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-              Master new skills with industry-leading courses. Join thousands of learners 
-              transforming their careers with our expert-led video courses.
+              Journey from "مرحبا" to fluent conversations with our expert-led courses. Learn Modern Standard Arabic or popular dialects with native instructors.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -230,11 +229,11 @@ export default function Home() {
               </div>
               <div className="flex items-center space-x-2">
                 <Award className="h-5 w-5 text-yellow-500" />
-                <span className="text-sm">Certificate of Completion</span>
+                <span className="text-sm">Arabic Proficiency Certificate</span>
               </div>
               <div className="flex items-center space-x-2">
                 <TrendingUp className="h-5 w-5 text-blue-500" />
-                <span className="text-sm">Career-Focused Skills</span>
+                <span className="text-sm">Native Arabic Instructors</span>
               </div>
             </div>
           </div>
@@ -265,11 +264,11 @@ export default function Home() {
                 <div className="flex flex-wrap gap-4 mb-6">
                   <div className="flex items-center space-x-2">
                     <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">E</span>
+                      <span className="text-white font-bold text-sm">ا</span>
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900">Expert Instructor</p>
-                      <p className="text-sm text-gray-500">Industry Professional</p>
+                      <p className="font-medium text-gray-900">Native Arabic Instructor</p>
+                      <p className="text-sm text-gray-500">10+ Years Experience</p>
                     </div>
                   </div>
                   
@@ -376,10 +375,10 @@ export default function Home() {
       <div id="courses" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold mb-4 text-gray-900">
-            Popular Courses
+            Popular Arabic Courses
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Handpicked courses to boost your career
+            Handpicked courses to master the Arabic language
           </p>
         </div>
         
@@ -404,7 +403,7 @@ export default function Home() {
                 {/* Course Badge */}
                 <div className="absolute top-4 left-4">
                   <span className="bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full">
-                    {course.category}
+                    {course.category || 'Arabic'}
                   </span>
                 </div>
                 
@@ -441,7 +440,7 @@ export default function Home() {
                     </div>
                     <div className="flex items-center space-x-1">
                       <Users className="h-4 w-4 text-blue-500" />
-                      <span className="text-sm text-gray-500">{course.students}+</span>
+                      <span className="text-sm text-gray-500">{course.students}+ students</span>
                     </div>
                   </div>
                   <div className="text-sm text-gray-500">
@@ -503,8 +502,8 @@ export default function Home() {
             <div className="w-24 h-24 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <PlayCircle className="h-12 w-12 text-blue-500" />
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">No courses available yet</h3>
-            <p className="text-gray-600 mb-6">We're preparing amazing courses for you!</p>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">No Arabic courses available yet</h3>
+            <p className="text-gray-600 mb-6">We're preparing amazing Arabic courses for you!</p>
             {user && (
               <button className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-300">
                 Suggest a Course
@@ -517,17 +516,17 @@ export default function Home() {
         <div className="mt-16 text-center">
           <div className="bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 rounded-3xl p-12">
             <h3 className="text-3xl font-bold mb-4 text-gray-900">
-              Ready to Transform Your Career?
+              Ready to Speak Arabic with Confidence?
             </h3>
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Join thousands of successful learners who've upgraded their skills with LearnHub.
+              Join thousands of successful learners who've achieved fluency with Master Arabic.
             </p>
             <Link
               href={user ? "/my-courses" : "/signup"}
               className="inline-flex items-center space-x-2 px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all duration-300 shadow-lg hover:shadow-2xl"
             >
               <span className="font-semibold text-lg">
-                {user ? 'Go to My Dashboard' : 'Join for Free Today'}
+                {user ? 'Go to My Dashboard' : 'Start Your Journey Today'}
               </span>
               <ChevronRight className="h-5 w-5" />
             </Link>

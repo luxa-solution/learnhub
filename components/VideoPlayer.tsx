@@ -36,10 +36,9 @@ export default function VideoPlayer({
   const handleTimeUpdate = useCallback((event: any) => {
     if (onProgress && event.target?.duration) {
       const progress = (event.target.currentTime / event.target.duration) * 100;
-      onProgress(Math.round(progress)); // ✅ Just pass the progress percentage
-      // ❌ REMOVED: Auto-completion at 95% (this was causing the bug)
+      onProgress(Math.round(progress)); 
     }
-  }, [onProgress]); // ✅ Removed onComplete from dependencies
+  }, [onProgress]); 
 
   const handleRetry = useCallback(() => {
     setPlayerState('retrying');
@@ -53,7 +52,7 @@ export default function VideoPlayer({
     });
   }, [playbackId, handlePlayerReady, handlePlayerError]);
 
-  // Initialize video service
+  
   useState(() => {
     videoService.initializePlayer({
       playbackId,

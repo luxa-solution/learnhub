@@ -1,8 +1,8 @@
-// lib/purchaseUtils.ts - COMPLETE FILE
+// lib/purchaseUtils.ts 
 import { collection, addDoc, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { db } from './firebase';
 
-// Check if user purchased a course
+
 export async function checkUserPurchase(userId: string, courseId: string): Promise<boolean> {
   try {
     const q = query(
@@ -19,7 +19,7 @@ export async function checkUserPurchase(userId: string, courseId: string): Promi
   }
 }
 
-// Record a new purchase
+
 export async function recordPurchase(userId: string, courseId: string): Promise<void> {
   try {
     await addDoc(collection(db, 'purchases'), {
@@ -35,14 +35,14 @@ export async function recordPurchase(userId: string, courseId: string): Promise<
   }
 }
 
-// ✅ NEW: Save course progress to Firestore
+
 export async function saveCourseProgress(
   userId: string, 
   courseId: string, 
   progress: number
 ): Promise<void> {
   try {
-    // Check if progress record already exists
+    
     const progressQuery = query(
       collection(db, 'courseProgress'),
       where('userId', '==', userId),
@@ -52,15 +52,14 @@ export async function saveCourseProgress(
     const querySnapshot = await getDocs(progressQuery);
     
     if (!querySnapshot.empty) {
-      // Update existing progress
       const progressDoc = querySnapshot.docs[0];
       await updateDoc(doc(db, 'courseProgress', progressDoc.id), {
-        progress: Math.min(100, Math.max(0, progress)), // Ensure between 0-100
+        progress: Math.min(100, Math.max(0, progress)), 
         lastUpdated: new Date(),
         completed: progress === 100
       });
     } else {
-      // Create new progress record
+      
       await addDoc(collection(db, 'courseProgress'), {
         userId,
         courseId,
@@ -78,7 +77,7 @@ export async function saveCourseProgress(
   }
 }
 
-// ✅ NEW: Get course progress from Firestore
+
 export async function getCourseProgress(
   userId: string, 
   courseId: string
@@ -97,7 +96,7 @@ export async function getCourseProgress(
       return data.progress || 0;
     }
     
-    return 0; // Default to 0 if no progress found
+    return 0; 
   } catch (error) {
     console.error('Error getting progress:', error);
     return 0;

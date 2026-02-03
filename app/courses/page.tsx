@@ -45,7 +45,6 @@ export default function CoursesPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [purchasing, setPurchasing] = useState<string | null>(null);
 
-  // Price filters
   const priceFilters = [
     { id: 'all', name: 'All Courses' },
     { id: 'free', name: 'Free' },
@@ -78,7 +77,6 @@ export default function CoursesPage() {
           } as Course);
         });
 
-        // Add purchase status if user is logged in
         if (user) {
           const coursesWithPurchaseStatus: CourseWithPurchase[] = await Promise.all(
             coursesData.map(async (course) => {
@@ -106,11 +104,9 @@ export default function CoursesPage() {
     fetchCourses();
   }, [user]);
 
-  // Filter courses based on search and filters
   useEffect(() => {
     let result = [...courses];
 
-    // Search filter
     if (searchTerm) {
       result = result.filter(course =>
         course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -118,7 +114,6 @@ export default function CoursesPage() {
       );
     }
 
-    // Price filter
     if (selectedPrice === 'free') {
       result = result.filter(course => course.price === 0);
     } else if (selectedPrice === 'paid') {
@@ -208,10 +203,10 @@ export default function CoursesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
           <div className="text-center">
             <h1 className="text-4xl lg:text-5xl font-bold mb-4">
-              Explore Our Courses
+              Discover Your Arabic Path
             </h1>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto mb-8">
-              Start learning today with our expert-led courses
+              From alphabet to eloquence, find the perfect course for your goals
             </p>
             
             {/* Search Bar */}
@@ -285,18 +280,18 @@ export default function CoursesPage() {
 
               {/* Stats */}
               <div className="border-t border-gray-200 pt-6">
-                <h3 className="font-semibold text-gray-900 mb-3">Course Stats</h3>
+                <h3 className="font-semibold text-gray-900 mb-3">Arabic Courses Stats</h3>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Total Courses</span>
+                    <span className="text-gray-600">Total Arabic Courses</span>
                     <span className="font-medium">{courses.length}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Free Courses</span>
+                    <span className="text-gray-600">Free Arabic Lessons</span>
                     <span className="font-medium">{courses.filter(c => c.price === 0).length}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Paid Courses</span>
+                    <span className="text-gray-600">Premium Courses</span>
                     <span className="font-medium">{courses.filter(c => c.price > 0).length}</span>
                   </div>
                 </div>
@@ -310,10 +305,10 @@ export default function CoursesPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">
-                  {searchTerm ? 'Search Results' : 'All Courses'}
+                  {searchTerm ? 'Search Results' : 'All Arabic Courses'}
                 </h2>
                 <p className="text-gray-600">
-                  {filteredCourses.length} course{filteredCourses.length !== 1 ? 's' : ''} available
+                  {filteredCourses.length} Arabic course{filteredCourses.length !== 1 ? 's' : ''} available
                 </p>
               </div>
               
@@ -419,7 +414,7 @@ export default function CoursesPage() {
                                 className="w-full flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 rounded-xl hover:from-green-100 hover:to-emerald-100 transition-all duration-300 font-semibold border border-green-200"
                               >
                                 <PlayCircle className="h-5 w-5" />
-                                <span>Continue Learning</span>
+                                <span>Continue Arabic Lessons</span>
                               </Link>
                             ) : (
                               <button
@@ -440,11 +435,11 @@ export default function CoursesPage() {
                                   </>
                                 ) : course.price === 0 ? (
                                   <>
-                                    <span>Enroll for Free</span>
+                                    <span>Start Arabic Lessons</span>
                                   </>
                                 ) : (
                                   <>
-                                    <span>Enroll Now</span>
+                                    <span>Start Arabic Course</span>
                                     <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                                   </>
                                 )}
@@ -455,7 +450,7 @@ export default function CoursesPage() {
                               href="/login"
                               className="w-full flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl"
                             >
-                              <span>Start Learning</span>
+                              <span>Start Arabic Learning</span>
                               <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                             </Link>
                           )}
@@ -595,19 +590,19 @@ export default function CoursesPage() {
 
             {/* Quick Stats */}
             <div className="mt-16 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Course Library Stats</h3>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Arabic Learning Library</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="text-center p-4 bg-white rounded-xl">
                   <div className="text-3xl font-bold text-blue-600 mb-1">{courses.length}</div>
-                  <div className="text-gray-600">Total Courses</div>
+                  <div className="text-gray-600">Arabic Courses</div>
                 </div>
                 <div className="text-center p-4 bg-white rounded-xl">
                   <div className="text-3xl font-bold text-green-600 mb-1">{courses.filter(c => c.price === 0).length}</div>
-                  <div className="text-gray-600">Free Courses</div>
+                  <div className="text-gray-600">Free Arabic Lessons</div>
                 </div>
                 <div className="text-center p-4 bg-white rounded-xl">
                   <div className="text-3xl font-bold text-purple-600 mb-1">{courses.filter(c => c.price > 0).length}</div>
-                  <div className="text-gray-600">Premium Courses</div>
+                  <div className="text-gray-600">Premium Arabic Courses</div>
                 </div>
               </div>
             </div>

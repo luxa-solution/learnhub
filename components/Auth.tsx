@@ -45,7 +45,7 @@ export default function Auth() {
     } catch (error: any) {
       console.error('Auth error:', error);
       
-      // User-friendly error messages
+      
       let errorMessage = 'Authentication failed.';
       if (error.code === 'auth/email-already-in-use') {
         errorMessage = 'Email already in use. Please sign in instead.';

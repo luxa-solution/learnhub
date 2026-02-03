@@ -156,9 +156,7 @@ export default function CourseVideoPage() {
     }
   }, [courseProgress, saveProgressToDatabase]);
 
-  // Handle video completion - FIXED VERSION
   const handleVideoComplete = useCallback(async () => {
-    // 🛡️ GUARD CLAUSE: Prevent multiple completions
     if (courseProgress === 100) {
       console.log('⚠️ Course already marked as complete. Skipping...');
       return;
@@ -166,17 +164,14 @@ export default function CourseVideoPage() {
     
     console.log('🎉 Video completed!');
     
-    // Set to 100% immediately
     setCourseProgress(100);
     setJustCompleted(true);
     
-    // Save completion to database
     if (user && courseId) {
       try {
         await saveCourseProgress(user.uid, courseId, 100);
         console.log('✅ Course marked as completed in database');
         
-        // Show celebration message
         setTimeout(() => {
           alert('🎉 Congratulations! You have completed this course!');
         }, 1000);
@@ -185,15 +180,14 @@ export default function CourseVideoPage() {
         console.error('Error marking course as completed:', error);
       }
     }
-  }, [user, courseId, courseProgress]); // ✅ Added courseProgress to dependencies
+  }, [user, courseId, courseProgress]); 
 
-  // Manual save button
+  
   const handleSaveProgress = async () => {
     if (!user || !courseId) return;
     
     await saveProgressToDatabase(courseProgress);
     
-    // Show temporary success feedback
     const button = document.getElementById('saveProgressBtn');
     if (button) {
       const originalHTML = button.innerHTML;
@@ -212,7 +206,6 @@ export default function CourseVideoPage() {
     }
   };
 
-  // Mark as complete button
   const handleMarkAsComplete = async () => {
     if (!user || !courseId) return;
     

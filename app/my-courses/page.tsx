@@ -1,3 +1,4 @@
+// app/my-courses/page.tsx 
 'use client'
 import { useEffect, useState } from 'react';
 import { collection, getDocs, query, where } from 'firebase/firestore';
@@ -18,9 +19,10 @@ import {
   Calendar,
   BarChart3,
   Target,
-  Sparkles
+  Sparkles,
+  Globe
 } from 'lucide-react';
-import { getCourseProgress } from '@/lib/purchaseUtils'; // ✅ Ensure this is imported
+import { getCourseProgress } from '@/lib/purchaseUtils';
 
 interface Course {
   id: string;
@@ -69,7 +71,6 @@ export default function MyCoursesPage() {
 
   const fetchPurchasedCourses = async (userId: string) => {
     try {
-      // Get all purchases for this user
       const purchasesQuery = query(
         collection(db, 'purchases'),
         where('userId', '==', userId)
@@ -84,7 +85,6 @@ export default function MyCoursesPage() {
         } as Purchase);
       });
 
-      // Get course details for each purchase WITH PROGRESS
       const coursesPromises = purchases.map(async (purchase) => {
         const coursesQuery = query(
           collection(db, 'courses'),
@@ -96,9 +96,8 @@ export default function MyCoursesPage() {
           const courseDoc = courseSnapshot.docs[0];
           const courseData = courseDoc.data();
           
-          // ✅ FIXED: Get progress using the userId parameter, NOT the component's user state
           let progress = 0;
-          progress = await getCourseProgress(userId, purchase.courseId); // ✅ Use userId parameter
+          progress = await getCourseProgress(userId, purchase.courseId);
           
           return {
             id: courseDoc.id,
@@ -108,10 +107,10 @@ export default function MyCoursesPage() {
             videoPlaybackId: courseData.videoPlaybackId,
             videoDuration: courseData.videoDuration,
             videoThumbnail: courseData.videoThumbnail,
-            instructor: courseData.instructor || 'Expert Instructor',
-            category: courseData.category || 'Development',
+            instructor: courseData.instructor || 'Native Arabic Instructor',
+            category: courseData.category || 'Arabic',
             purchaseDate: purchase.purchaseDate,
-            progress: progress, // ✅ REAL progress from database
+            progress: progress,
             lastWatched: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000)
           } as CourseWithPurchase;
         }
@@ -124,21 +123,15 @@ export default function MyCoursesPage() {
         course !== null
       );
 
-      // Remove duplicate courses
       const uniqueCourses = validCourses.filter((course, index, self) => {
         const firstIndex = self.findIndex(c => c.id === course.id);
         return index === firstIndex;
       });
              
-      console.log('📊 Loaded purchased courses with progress:', uniqueCourses.map(c => ({
-        title: c.title,
-        progress: c.progress
-      })));
-             
       setPurchasedCourses(uniqueCourses);
          
     } catch (error) {
-      console.error('Error fetching purchased courses:', error);
+      console.error('Error fetching purchased Arabic courses:', error);
     } finally {
       setLoading(false);
     }
@@ -161,7 +154,7 @@ export default function MyCoursesPage() {
   };
 
   const formatDuration = (seconds: number | undefined) => {
-    if (!seconds) return '2h';
+    if (!seconds) return '10h';
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
          
@@ -171,7 +164,6 @@ export default function MyCoursesPage() {
     return `${minutes}m`;
   };
 
-  // Filter and search courses
   const filteredCourses = purchasedCourses.filter(course => {
     const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          course.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -182,7 +174,6 @@ export default function MyCoursesPage() {
     return matchesSearch;
   });
 
-  // Calculate stats
   const totalCourses = purchasedCourses.length;
   const completedCourses = purchasedCourses.filter(c => c.progress === 100).length;
   const inProgressCourses = purchasedCourses.filter(c => c.progress > 0 && c.progress < 100).length;
@@ -198,7 +189,7 @@ export default function MyCoursesPage() {
         <div className="flex justify-center items-center h-64">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-lg text-gray-600">Loading your courses...</p>
+            <p className="text-lg text-gray-600">Loading your Arabic courses...</p>
           </div>
         </div>
       </div>
@@ -210,16 +201,18 @@ export default function MyCoursesPage() {
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
         <Navbar user={user} />
         <div className="max-w-4xl mx-auto py-16 px-4 text-center">
+          {/* Logo removed */}
           <div className="w-24 h-24 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <BookOpen className="h-12 w-12 text-blue-500" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">My Courses</h1>
-          <p className="text-gray-600 mb-8">Please sign in to view your courses.</p>
+          
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">My Arabic Journey</h1>
+          <p className="text-gray-600 mb-8">Please sign in to view your Arabic courses.</p>
           <Link 
              href="/"
              className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-300"
           >
-            <span>Go to Courses</span>
+            <span>Go to Arabic Courses</span>
             <TrendingUp className="h-5 w-5" />
           </Link>
         </div>
@@ -236,16 +229,16 @@ export default function MyCoursesPage() {
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">My Learning</h1>
+              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">My Arabic Journey</h1>
               <p className="text-gray-600 mt-2">
-                Continue your learning journey
+                Continue your Arabic learning journey
               </p>
             </div>
             
             <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-50 to-purple-50 px-4 py-2 rounded-full">
               <Sparkles className="h-4 w-4 text-purple-500" />
               <span className="text-sm font-medium text-purple-700">
-                Keep going! You're making progress
+                Keep going! You're making great Arabic progress
               </span>
             </div>
           </div>
@@ -256,11 +249,11 @@ export default function MyCoursesPage() {
           <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-6 rounded-2xl">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-blue-600 font-medium">Total Courses</p>
+                <p className="text-sm text-blue-600 font-medium">Arabic Courses</p>
                 <p className="text-3xl font-bold text-gray-900">{totalCourses}</p>
               </div>
               <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
-                <BookOpen className="h-6 w-6 text-blue-500" />
+                <Globe className="h-6 w-6 text-blue-500" />
               </div>
             </div>
           </div>
@@ -268,7 +261,7 @@ export default function MyCoursesPage() {
           <div className="bg-gradient-to-r from-green-50 to-green-100 p-6 rounded-2xl">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-green-600 font-medium">Completed</p>
+                <p className="text-sm text-green-600 font-medium">Arabic Completed</p>
                 <p className="text-3xl font-bold text-gray-900">{completedCourses}</p>
               </div>
               <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
@@ -280,7 +273,7 @@ export default function MyCoursesPage() {
           <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-6 rounded-2xl">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-purple-600 font-medium">In Progress</p>
+                <p className="text-sm text-purple-600 font-medium">Arabic In Progress</p>
                 <p className="text-3xl font-bold text-gray-900">{inProgressCourses}</p>
               </div>
               <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
@@ -292,7 +285,7 @@ export default function MyCoursesPage() {
           <div className="bg-gradient-to-r from-pink-50 to-pink-100 p-6 rounded-2xl">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-pink-600 font-medium">Learning Hours</p>
+                <p className="text-sm text-pink-600 font-medium">Arabic Practice Hours</p>
                 <p className="text-3xl font-bold text-gray-900">{totalLearningTime}h</p>
               </div>
               <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
@@ -310,7 +303,7 @@ export default function MyCoursesPage() {
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search your courses..."
+                placeholder="Search your Arabic courses..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -326,9 +319,9 @@ export default function MyCoursesPage() {
                   onChange={(e) => setFilter(e.target.value as any)}
                   className="bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="all">All Courses</option>
-                  <option value="in-progress">In Progress</option>
-                  <option value="completed">Completed</option>
+                  <option value="all">All Arabic Courses</option>
+                  <option value="in-progress">Arabic In Progress</option>
+                  <option value="completed">Arabic Completed</option>
                 </select>
               </div>
               
@@ -446,17 +439,17 @@ export default function MyCoursesPage() {
                       {course.progress === 100 ? (
                         <>
                           <Award className="h-5 w-5" />
-                          <span>View Certificate</span>
+                          <span>View Arabic Certificate</span>
                         </>
                       ) : course.progress > 0 ? (
                         <>
                           <PlayCircle className="h-5 w-5" />
-                          <span>Continue Learning</span>
+                          <span>Continue Arabic Lessons</span>
                         </>
                       ) : (
                         <>
                           <PlayCircle className="h-5 w-5" />
-                          <span>Start Learning</span>
+                          <span>Start Arabic Lessons</span>
                         </>
                       )}
                     </Link>
@@ -465,7 +458,7 @@ export default function MyCoursesPage() {
               ))}
             </div>
           ) : (
-            // List View
+            
             <div className="space-y-4">
               {filteredCourses.map((course) => (
                 <div key={course.id} className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300">
@@ -534,7 +527,7 @@ export default function MyCoursesPage() {
                         <div className="lg:w-48 flex-shrink-0">
                           <div className="mb-4">
                             <div className="flex justify-between text-sm text-gray-600 mb-1">
-                              <span>Progress</span>
+                              <span>Arabic Progress</span>
                               <span>{course.progress}%</span>
                             </div>
                             <div className="w-full bg-gray-200 rounded-full h-2">
@@ -560,12 +553,12 @@ export default function MyCoursesPage() {
                             {course.progress === 100 ? (
                               <>
                                 <Award className="h-4 w-4" />
-                                <span>View Certificate</span>
+                                <span>View Arabic Certificate</span>
                               </>
                             ) : (
                               <>
                                 <PlayCircle className="h-4 w-4" />
-                                <span>Continue</span>
+                                <span>Continue Arabic</span>
                               </>
                             )}
                           </Link>
@@ -578,20 +571,20 @@ export default function MyCoursesPage() {
             </div>
           )
         ) : (
-          // Empty State
+          
           <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
             <div className="w-24 h-24 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <Target className="h-12 w-12 text-blue-500" />
             </div>
             
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              {searchTerm ? 'No courses found' : 'Start Your Learning Journey'}
+              {searchTerm ? 'No Arabic courses found' : 'Start Your Arabic Journey'}
             </h2>
             
             <p className="text-gray-600 mb-6 max-w-md mx-auto">
               {searchTerm 
-                ? 'No courses match your search. Try different keywords.'
-                : 'You haven\'t enrolled in any courses yet. Explore our catalog and start learning!'
+                ? 'No Arabic courses match your search. Try different keywords.'
+                : 'You haven\'t enrolled in any Arabic courses yet. Explore our catalog and start learning Arabic!'
               }
             </p>
             
@@ -608,7 +601,7 @@ export default function MyCoursesPage() {
                   href="/"
                   className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all duration-300"
                 >
-                  Browse Courses
+                  Browse Arabic Courses
                 </Link>
               )}
               
@@ -616,7 +609,7 @@ export default function MyCoursesPage() {
                 href="/courses"
                 className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:border-blue-500 hover:text-blue-600 transition-all duration-300"
               >
-                Explore All
+                Explore All Arabic
               </Link>
             </div>
           </div>
@@ -628,9 +621,9 @@ export default function MyCoursesPage() {
             <div className="bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 rounded-2xl p-8">
               <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
                 <div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Keep Going! 🚀</h3>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Keep Practicing Arabic! 🚀</h3>
                   <p className="text-gray-600">
-                    Consistency is key to learning. Try to spend at least 30 minutes daily on your courses.
+                    Consistency is key to mastering Arabic. Try to spend at least 30 minutes daily on your Arabic lessons.
                   </p>
                 </div>
                 <div className="flex items-center space-x-4">
@@ -638,13 +631,13 @@ export default function MyCoursesPage() {
                     <div className="text-3xl font-bold text-blue-600">
                       {Math.round(filteredCourses.reduce((acc, c) => acc + c.progress, 0) / filteredCourses.length)}%
                     </div>
-                    <div className="text-sm text-gray-600">Avg. Progress</div>
+                    <div className="text-sm text-gray-600">Avg. Arabic Progress</div>
                   </div>
                   <div className="text-center">
                     <div className="text-3xl font-bold text-purple-600">
                       {filteredCourses.filter(c => c.progress > 0).length}
                     </div>
-                    <div className="text-sm text-gray-600">Active Courses</div>
+                    <div className="text-sm text-gray-600">Active Arabic Courses</div>
                   </div>
                 </div>
               </div>

@@ -1,4 +1,4 @@
-// app/signup/page.tsx - MODERN VERSION
+// app/signup/page.tsx 
 'use client'
 
 import { useState } from 'react';
@@ -74,7 +74,7 @@ export default function SignUpPage() {
       console.log('✅ User created successfully:', user.email);
       setSuccess('Account created successfully! Redirecting...');
       
-      // Send welcome email
+      
       EmailService.sendWelcomeEmail(email, email.split('@')[0])
         .then(success => {
           if (success) {
@@ -83,7 +83,6 @@ export default function SignUpPage() {
         })
         .catch(err => console.log('Note: Welcome email was skipped', err));
       
-      // Redirect to home page after 2 seconds
       setTimeout(() => {
         router.push('/'); 
       }, 2000);
@@ -91,7 +90,6 @@ export default function SignUpPage() {
     } catch (err: any) {
       console.error('❌ Firebase signup error:', err.code, err.message);
       
-      // Handle specific Firebase errors
       switch (err.code) {
         case 'auth/email-already-in-use':
           setError('This email is already registered. Please sign in instead.');
@@ -112,7 +110,7 @@ export default function SignUpPage() {
           setError(`Error: ${err.message || 'Failed to create account. Please try again.'}`);
       }
       
-      // Clear password fields on error
+      
       setPassword('');
       setConfirmPassword('');
       
@@ -139,10 +137,10 @@ export default function SignUpPage() {
               </div>
               
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                Join LearnHub Today
+                Join Master Arabic Today
               </h1>
               <p className="text-gray-600">
-                Start your learning journey with thousands of courses
+                Start your Arabic learning journey with thousands of students
               </p>
             </div>
 
@@ -290,7 +288,7 @@ export default function SignUpPage() {
           {/* Right Side - Benefits */}
           <div className="lg:w-1/2 bg-gradient-to-br from-purple-500 to-pink-600 p-8 lg:p-12 flex flex-col justify-center">
             <div className="text-white">
-              <h2 className="text-2xl font-bold mb-8">Why Join LearnHub?</h2>
+              <h2 className="text-2xl font-bold mb-8">Why Join Arabic Made Easy?</h2>
               
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
@@ -298,9 +296,9 @@ export default function SignUpPage() {
                     <TrendingUp className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg mb-1">Career Growth</h3>
+                    <h3 className="font-bold text-lg mb-1">Cultural Immersion</h3>
                     <p className="text-white/80 text-sm">
-                      Learn skills that companies actually need
+                       Learn authentic Arabic with cultural context and native expressions
                     </p>
                   </div>
                 </div>
@@ -310,9 +308,9 @@ export default function SignUpPage() {
                     <Sparkles className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg mb-1">Expert Instructors</h3>
+                    <h3 className="font-bold text-lg mb-1">Arabic Certificate</h3>
                     <p className="text-white/80 text-sm">
-                      Learn from industry professionals and experts
+                      Earn recognized Arabic proficiency certificates
                     </p>
                   </div>
                 </div>
@@ -322,9 +320,9 @@ export default function SignUpPage() {
                     <CheckCircle className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg mb-1">Certificates</h3>
+                    <h3 className="font-bold text-lg mb-1">30-Day Guarantee</h3>
                     <p className="text-white/80 text-sm">
-                      Earn certificates to showcase your skills
+                      Get your money back if you're not satisfied with your progress
                     </p>
                   </div>
                 </div>
@@ -346,15 +344,15 @@ export default function SignUpPage() {
               <div className="mt-12 grid grid-cols-3 gap-4">
                 <div className="text-center">
                   <div className="text-2xl font-bold mb-1">10K+</div>
-                  <div className="text-sm text-white/80">Students</div>
+                  <div className="text-sm text-white/80">Arabic Learners</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold mb-1">500+</div>
-                  <div className="text-sm text-white/80">Courses</div>
+                  <div className="text-sm text-white/80">Arabic Courses</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold mb-1">50+</div>
-                  <div className="text-sm text-white/80">Instructors</div>
+                  <div className="text-sm text-white/80">Arabic Instructors</div>
                 </div>
               </div>
             </div>

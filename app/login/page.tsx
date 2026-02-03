@@ -1,4 +1,4 @@
-// app/login/page.tsx - MODERN VERSION
+// app/login/page.tsx 
 'use client'
 import { useState } from 'react';
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
@@ -56,7 +56,7 @@ export default function LoginPage() {
       await signInWithEmailAndPassword(auth, email, password);
       console.log('✅ Login successful');
       
-      // Show success animation
+      
       setTimeout(() => {
         router.push('/'); 
       }, 500);
@@ -143,16 +143,16 @@ export default function LoginPage() {
             </div>
             
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Welcome Back
+              Welcome Back to Master Arabic
             </h1>
             <p className="text-gray-600">
-              Sign in to continue your learning journey
+              Sign in to continue your Arabic learning journey
             </p>
           </div>
 
           <div className="px-8 pb-8">
             {resetSent ? (
-              // Password Reset Success
+              
               <div className="text-center">
                 <div className="w-20 h-20 bg-gradient-to-r from-green-100 to-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Mail className="h-10 w-10 text-green-600" />
@@ -172,7 +172,7 @@ export default function LoginPage() {
                 </button>
               </div>
             ) : showResetForm ? (
-              // Password Reset Form
+              
               <div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Reset Password</h3>
                 
@@ -315,7 +315,7 @@ export default function LoginPage() {
                     </div>
                     <div className="relative flex justify-center">
                       <span className="px-4 bg-white text-gray-500 text-sm font-medium">
-                        New to LearnHub?
+                        New to Arabic Made Easy?
                       </span>
                     </div>
                   </div>
@@ -350,19 +350,19 @@ export default function LoginPage() {
             <div className="w-12 h-12 bg-gradient-to-r from-blue-100 to-blue-200 rounded-full flex items-center justify-center mx-auto mb-2">
               <Sparkles className="h-6 w-6 text-blue-600" />
             </div>
-            <p className="text-xs text-gray-600">Personalized</p>
+            <p className="text-xs text-gray-600">Personalized Arabic</p>
           </div>
           <div className="text-center">
             <div className="w-12 h-12 bg-gradient-to-r from-purple-100 to-purple-200 rounded-full flex items-center justify-center mx-auto mb-2">
               <Shield className="h-6 w-6 text-purple-600" />
             </div>
-            <p className="text-xs text-gray-600">Secure</p>
+            <p className="text-xs text-gray-600">Native Instructors</p>
           </div>
           <div className="text-center">
             <div className="w-12 h-12 bg-gradient-to-r from-pink-100 to-pink-200 rounded-full flex items-center justify-center mx-auto mb-2">
               <Lock className="h-6 w-6 text-pink-600" />
             </div>
-            <p className="text-xs text-gray-600">Private</p>
+            <p className="text-xs text-gray-600">Secure Learning</p>
           </div>
         </div>
       </div>

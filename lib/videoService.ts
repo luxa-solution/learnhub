@@ -11,12 +11,10 @@ class VideoService {
 
   async initializePlayer(config: VideoPlayerConfig): Promise<boolean> {
     try {
-      // Validate playback ID
       if (!this.isValidPlaybackId(config.playbackId)) {
         throw new Error('Invalid playback ID');
       }
 
-      // Check network conditions
       const networkHealthy = await this.checkNetworkHealth();
       if (!networkHealthy) {
         throw new Error('Poor network conditions');
@@ -33,7 +31,6 @@ class VideoService {
   private async handleError(error: any, config: VideoPlayerConfig): Promise<boolean> {
     console.warn('Video service error:', error);
          
-    // Exponential backoff retry
     if (this.retryCount < this.maxRetries) {
       this.retryCount++;
       const delay = Math.pow(2, this.retryCount) * 1000; // 2s, 4s, 8s
@@ -46,7 +43,7 @@ class VideoService {
       return false;
     }
 
-    // Final error handling
+    
     config.onError?.(error);
     return false;
   }
@@ -56,7 +53,7 @@ class VideoService {
   }
 
   private async checkNetworkHealth(): Promise<boolean> {
-    // Simple network check - return boolean directly
+    
     return navigator.onLine;
   }
 }

@@ -1,4 +1,4 @@
-// app/success/page.tsx - COMPLETE FIXED VERSION
+// app/success/page.tsx 
 'use client'
 
 import { Suspense, useEffect, useState } from 'react';
@@ -12,7 +12,6 @@ import Link from 'next/link';
 import { recordPurchase } from '@/lib/purchaseUtils';
 import { EmailService } from '@/lib/services/emailService'; 
 
-// Create the main content component that uses useSearchParams
 function SuccessContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
@@ -70,7 +69,7 @@ function SuccessContent() {
               console.log('✅ Purchase email sent successfully');
             } else {
               console.warn('⚠️ Purchase email failed, but purchase was recorded');
-              // Don't show error to user, just log it
+              
             }
           }
                  
@@ -100,8 +99,8 @@ function SuccessContent() {
         <div className="flex justify-center items-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <div className="text-xl font-semibold text-gray-700 mb-2">Processing Your Purchase</div>
-            <div className="text-gray-500">Please wait while we confirm your enrollment...</div>
+            <div className="text-xl font-semibold text-gray-700 mb-2">Processing Your Arabic Course Enrollment</div>
+            <div className="text-gray-500">Please wait while we confirm your Arabic course access...</div>
             {sessionId && (
               <div className="mt-4 text-sm text-gray-400">
                 Order: {sessionId.substring(0, 8)}...
@@ -120,7 +119,7 @@ function SuccessContent() {
       <main className="max-w-4xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 text-center">
           {error ? (
-            // Error State
+            
             <>
               <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <svg className="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -166,7 +165,7 @@ function SuccessContent() {
               </div>
             </>
           ) : (
-            // Success State
+            
             <>
               <div className="w-20 h-20 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
                 <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -246,7 +245,7 @@ function SuccessContent() {
                      href={`/courses/${courseId}`}
                      className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-4 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-300 font-medium shadow-md"
                   >
-                    Start Learning Now
+                    Start Learning Arabic Now
                   </Link>
                 )}
                          
@@ -254,7 +253,7 @@ function SuccessContent() {
                    href="/my-courses"
                    className="bg-white border-2 border-blue-500 text-blue-600 px-8 py-4 rounded-lg hover:bg-blue-50 transition-colors font-medium"
                 >
-                  Go to My Courses
+                  Go to My Arabic Courses
                 </Link>
               </div>
 
@@ -292,7 +291,6 @@ function SuccessContent() {
   );
 }
 
-// Main page component with Suspense wrapper
 export default function SuccessPage() {
   return (
     <Suspense fallback={
@@ -301,8 +299,8 @@ export default function SuccessPage() {
         <div className="flex justify-center items-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <div className="text-xl font-semibold text-gray-700 mb-2">Loading Purchase Details...</div>
-            <div className="text-gray-500">Please wait while we prepare your success page...</div>
+            <div className="text-xl font-semibold text-gray-700 mb-2">Loading Arabic Course Details...</div>
+            <div className="text-gray-500">Please wait while we prepare your Arabic learning dashboard...</div>
           </div>
         </div>
       </div>

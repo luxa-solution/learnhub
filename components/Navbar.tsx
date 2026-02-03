@@ -1,4 +1,4 @@
-// components/Navbar.tsx - MODERN VERSION
+// components/Navbar.tsx 
 'use client'
 
 import Link from 'next/link';
@@ -63,16 +63,15 @@ export default function Navbar({ user: propUser }: NavbarProps) {
 
   return (
     <>
-      {/* Modern Navbar */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled 
           ? 'bg-white/90 backdrop-blur-md shadow-lg border-b border-gray-200/50' 
           : 'bg-white border-b border-gray-200'
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16 lg:h-20">
+          <div className="flex justify-between items-center h-28 lg:h-32"> 
             
-            {/* Logo Section */}
+            {/* Logo Section  */}
             <div className="flex items-center">
               <Link 
                 href="/" 
@@ -80,17 +79,17 @@ export default function Navbar({ user: propUser }: NavbarProps) {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <div className="relative">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <BookOpen className="w-6 h-6 text-white" />
+                  <div className="w-22 h-22 rounded-xl flex items-center justify-center">
+                    <img 
+                      src="/images/logo.png" 
+                      alt="Master Arabic Logo" 
+                      className="w-full h-full object-contain"
+                    />
                   </div>
-                  <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity"></div>
                 </div>
                 <div>
-                  <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    LearnHub
-                  </span>
                   <span className="ml-2 text-xs font-semibold bg-gradient-to-r from-emerald-500 to-green-500 text-white px-2 py-1 rounded-full">
-                    PRO
+                    الـعـربـيـة
                   </span>
                 </div>
               </Link>
@@ -136,7 +135,7 @@ export default function Navbar({ user: propUser }: NavbarProps) {
               <div className="relative ml-4">
                 <input
                   type="text"
-                  placeholder="Search courses..."
+                  placeholder="Search Arabic courses..."
                   className="w-64 px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
                 />
                 <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
@@ -162,7 +161,7 @@ export default function Navbar({ user: propUser }: NavbarProps) {
                       <p className="text-sm font-medium text-gray-900">
                         {user.email?.split('@')[0]}
                       </p>
-                      <p className="text-xs text-gray-500">Student</p>
+                      <p className="text-xs text-gray-500">Arabic Learner</p>
                     </div>
                   </div>
                   <button
@@ -195,16 +194,16 @@ export default function Navbar({ user: propUser }: NavbarProps) {
                     href="/signup"
                     className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-200 shadow-lg hover:shadow-xl"
                   >
-                    Get Started
+                    Start Learning
                   </Link>
                 </div>
               )}
             </div>
 
-            {/* Mobile Menu Button */}
+            {/* Mobile Menu Button  */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 text-gray-700 hover:text-blue-600"
+              className="lg:hidden p-2 text-gray-700 hover:text-blue-600 mt-2" 
             >
               {mobileMenuOpen ? (
                 <X className="h-6 w-6" />
@@ -263,7 +262,7 @@ export default function Navbar({ user: propUser }: NavbarProps) {
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">{user.email}</p>
-                      <p className="text-sm text-gray-500">Student</p>
+                      <p className="text-sm text-gray-500">Arabic Learner</p>
                     </div>
                   </div>
                 </>
@@ -302,7 +301,7 @@ export default function Navbar({ user: propUser }: NavbarProps) {
                       className="block w-full text-center px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-200"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      Get Started
+                      Start Learning
                     </Link>
                   </>
                 )}
@@ -312,8 +311,7 @@ export default function Navbar({ user: propUser }: NavbarProps) {
         )}
       </nav>
 
-      {/* Spacer for fixed navbar */}
-      <div className="h-16 lg:h-20"></div>
+      <div className="h-28 lg:h-32"></div> 
     </>
   );
 }
